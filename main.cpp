@@ -1,7 +1,11 @@
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
+#include <ctype.h>
 
 using namespace std;
+
+std::string line;
 
 //???
 string mitigateCommandInjection(string sql){
@@ -24,8 +28,17 @@ string mitigateUnion(string sql){
     //Is there union
     string cleanedScript = "";
 
-
-
+    /*******
+     * SET Operator Mitigation
+     * Conditions:
+     * If this string contains 'UNION'
+     * If the sql string contains 'INTERSECT'
+     * If the sql string contains 'MINUS'
+     * If the sql string contains too many spaces
+     */
+    if (sql == "UNION"){
+        return "invalid password";
+    }
     return cleanedScript;
 }
 
@@ -169,3 +182,4 @@ int main() {
     cout << genQuery(in_username, in_password) << endl;
     return 0;
 }
+
