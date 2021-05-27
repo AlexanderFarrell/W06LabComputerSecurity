@@ -5,23 +5,28 @@ using namespace std;
 
 //???
 string mitigateCommandInjection(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
 string mitigateComment(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
 string mitigateAddState(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
 string mitigateUnion(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
     //Is there union
+    string cleanedScript = "";
+
+
+
+    return cleanedScript;
 }
 
 //???
@@ -36,22 +41,22 @@ string mitigateValid(string sql){
 
 //???
 void testCommandInjection(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
 void testComment(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
 void testAddState(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
 void testUnion(string sql){
-    throw exception("Not implemented");
+    //throw exception("Not implemented");
 }
 
 //???
@@ -153,11 +158,13 @@ int main() {
     string in_username;
     string in_password;
 
+
+
     cout << "Please login.\n";
     cout << "Username: ";
-    cin >> in_username;
+    getline(cin, in_username);
     cout << "Password: ";
-    cin >> in_password;
+    getline(cin,in_password);
 
     cout << genQuery(in_username, in_password) << endl;
     return 0;
