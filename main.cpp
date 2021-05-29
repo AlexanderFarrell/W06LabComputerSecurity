@@ -53,6 +53,12 @@ bool isSemicolon(char c){
     return (c == ';');
 }
 
+//Gets the lower case version of the word
+string getLowerCase(string word){
+    transform(word.begin(), word.end(), word.begin(), std::tolower);
+    return word;
+}
+
 //Tests if a comment is present
 void testComment(string sql){
 //throw exception("Not implemented");
@@ -86,25 +92,6 @@ void testUnion(string sql){
 //Tests if there may be a tautology attack present
 void testTautology(string sql){
 
-}
-
-//Gets the lower case version of the word
-string getLowerCase(string word){
-    transform(word.begin(), word.end(), word.begin(), std::tolower);
-    return word;
-}
-
-//Gets valid input, only accepting letters, numbers and underscores
-string getValidInput(const string& input){
-    stringstream s = stringstream("");
-
-    for (char i : input) {
-        if (isAlphaNumericUnderscore(i)){
-            s << i;
-        }
-    }
-
-    return s.str();
 }
 
 //sub-function of testValid
@@ -145,7 +132,7 @@ void testValid(string username, string password){
         cout << "The password does not have a valid input" << endl;
 }
 
-//Performs strong mitigation against attacks, only accepting valid input
+//Performs strong mitigation against attacks for the specific string, only accepting valid input
 string strongMitigation(const string& input){
     stringstream sBuilder = stringstream("");
 
@@ -158,6 +145,7 @@ string strongMitigation(const string& input){
     return sBuilder.str();
 }
 
+//Performs weak mitigation against attacks for the specific string, filtering from a "blocklist"
 string weakMitigation(const string& input){
     stringstream sBuilder = stringstream("");
 
@@ -191,9 +179,9 @@ string genQueryStrong(const string& username, const string& password){
     s << "SELECT authenticate\n"
          "FROM passwordList\n"
          "WHERE password="
-      << strongMitigation(getValidInput(username))
+      << strongMitigation(username)
       << " and username="
-      << strongMitigation(getValidInput(password))
+      << strongMitigation(password)
       << "\";";
 
     return s.str();
