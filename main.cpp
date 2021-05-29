@@ -2,6 +2,7 @@
 #include <sstream>
 #include <cctype>
 #include <algorithm>
+#include <utility>
 
 using namespace std;
 
@@ -61,7 +62,6 @@ string getLowerCase(string word){
 
 //Tests if a comment is present
 void testComment(string sql){
-//throw exception("Not implemented");
     string comment ="--";
     long found = sql.find(comment);
     if (found != string::npos)
@@ -76,17 +76,33 @@ void testComment(string sql){
 
 //Tests if an additional statement may be present
 void testAddState(string sql){
-    //throw exception("Not implemented");
+    bool success = true;
+
     for(int i = 0; i < sql.length(); i++){
         if(sql[i] == 59){    //59 is the ASCII code for ';'
-            cout << "\tPossible Additional Statement Attack\n";
+            cout << "\tERROR: Possible Additional Statement Attack\n";
+            success = false;
         }
+    }
+
+    if (success){
+        cout << "\tSuccess: No Additional Statement Attack\n";
     }
 }
 
 //Tests if union is present
 void testUnion(string sql){
-    //throw exception("Not implemented");
+    string lower = getLowerCase(std::move(sql));
+    string comment ="union";
+    long found = lower.find(comment);
+    if (found != string::npos)
+    {
+        cout << "\tERROR: There is a possible union statement in the query \n";
+    }
+    else
+    {
+        cout<< "\tSuccess: No Union Statement\n";
+    }
 }
 
 //Tests if there may be a tautology attack present
@@ -178,9 +194,9 @@ string genQueryStrong(const string& username, const string& password){
 
     s << "SELECT authenticate\n"
          "FROM passwordList\n"
-         "WHERE password="
+         "WHERE password=\""
       << strongMitigation(username)
-      << " and username="
+      << "\" and username=\""
       << strongMitigation(password)
       << "\";";
 
@@ -195,9 +211,9 @@ string genQueryWeak(const string& username, const string& password){
 
     s << "SELECT authenticate\n"
          "FROM passwordList\n"
-         "WHERE password="
+         "WHERE password=\""
       << weakMitigation(username)
-      << " and username="
+      << "\" and username=\""
       << weakMitigation(password)
       << "\";";
 
@@ -215,9 +231,9 @@ string genQuery(const string& username, const string& password){
 
     s << "SELECT authenticate\n"
          "FROM passwordList\n"
-         "WHERE password="
+         "WHERE password=\""
       << password
-      << " and username="
+      << "\" and username=\""
       << username
       << "\";";
 
