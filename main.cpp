@@ -79,7 +79,7 @@ void testAddState(string sql){
     bool success = true;
 
     for(int i = 0; i < sql.length(); i++){
-        if(sql[i] == 59){    //59 is the ASCII code for ';'
+        if(sql[i] == 59 && i != sql.length() - 1){    //59 is the ASCII code for ';'
             cout << "\tERROR: Possible Additional Statement Attack\n";
             success = false;
         }
