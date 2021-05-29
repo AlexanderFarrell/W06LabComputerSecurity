@@ -17,9 +17,20 @@ string mitigateComment(string sql){
     //throw exception("Not implemented");
 }
 
-//???
+// In this scenario where we are only asking for a username and password,
+// that information will not get passed into the operating system command 
+// interpreter, and therefore an additional statement attack could not occur.
+// However, if we were to send this info to the system, the best way to mitigate
+// an additional statement attack would be to eliminate semicolons, which is what this
+// function does.
 string mitigateAddState(string sql){
     //throw exception("Not implemented");
+    for(int i = 0; i < sql.length(); i++){
+        if(sql[i] == 59){    //59 is the ASCII code for ';'
+            sql[i] = ' ';
+        }
+    }
+    return sql;
 }
 
 //???
@@ -48,8 +59,21 @@ string mitigateTautology(string sql){
 }
 
 //Returns a query with the username and password. Tests if they are valid.
+//Not really sure what to do with this one, so with this I'm just changing the
+//invalid characters into spaces.
 string mitigateValid(string sql){
-
+    for (int i = 0; i < sql.length(); i++){
+        if (sql[i] >= 65 && sql[i] <= 90 || //uppercase letters
+        sql[i] >= 97 && sql[i] <= 122 || //lowercase letters
+        sql[i] >= 48 && sql[i] <= 57 || //numbers 
+        sql[i] == 95) //underscore
+        {
+            continue;
+        }
+        else {
+            sql[i] = ' ';
+        }
+    }
 }
 
 //???
@@ -65,6 +89,12 @@ void testComment(string sql){
 //???
 void testAddState(string sql){
     //throw exception("Not implemented");
+    for(int i = 0; i < sql.length(); i++){
+        if(sql[i] == 59){    //59 is the ASCII code for ';'
+            cout << "Possible Additional Statement Attack";
+        }
+    }
+    
 }
 
 //???
@@ -77,9 +107,43 @@ void testTautology(string sql){
 
 }
 
-//Returns a query with the username and password. Tests if they are valid.
-void testValid(string sql){
 
+//sub-function of testValid
+bool testValidInput(string input){
+    bool validInput = true;
+    for (int i = 0; i < input.length(); i++){
+        if (input[i] >= 65 && input[i] <= 90 || //uppercase letters
+        input[i] >= 97 && input[i] <= 122 || //lowercase letters
+        input[i] >= 48 && input[i] <= 57 || //numbers 
+        input[i] == 95) //underscore
+        {
+            continue;
+        }
+        else {
+            validInput = false;
+            break;
+        }
+    }
+    return validInput;
+}
+
+//Returns a query with the username and password. Tests if they are valid.
+//Assignment says "Generate a set of cases (one for each member of your team) that 
+//represent valid input where the username and the password consist of letters, numbers, 
+//and underscores." Based on this, will check to see if username and password consist of 
+//letters, numbers, and underscore, and will output whether or not it is valid.
+void testValid(string username, string password){
+    bool validUsername = testValidInput(username);
+    bool validPassword = testValidInput(password);
+
+    if(validUsername)
+        cout << "The username has a valid input" << endl;
+    else
+        cout << "The username does not have a valid input" << endl;
+    if(validPassword)
+        cout << "The password has a valid input" << endl;
+    else
+        cout << "The password does not have a valid input" << endl;
 }
 
 //Provides a strong mitigation against all five attacks (Tautology, Union, AddState, Comment, Command Injection)
@@ -104,7 +168,7 @@ string genQueryStrong(const string& username, const string& password){
     sql = mitigateComment(sql);
     sql = mitigateCommandInjection(sql);
 
-    testValid(sql);
+    testValid(username, password);
     testTautology(sql);
     testUnion(sql);
     testAddState(sql);
@@ -135,7 +199,7 @@ string genQueryWeak(const string& username, const string& password){
     sql = mitigateAddState(sql);
     sql = mitigateComment(sql);
 
-    testValid(sql);
+    testValid(username, password);
     testTautology(sql);
     testUnion(sql);
     testAddState(sql);
@@ -158,7 +222,7 @@ string genQuery(const string& username, const string& password){
 
     string sql = s.str();
 
-    testValid(sql);
+    testValid(username, password);
     testTautology(sql);
     testUnion(sql);
     testAddState(sql);
