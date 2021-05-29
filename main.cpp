@@ -1,121 +1,120 @@
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
-#include <ctype.h>
+#include <cctype>
+#include <algorithm>
 
 using namespace std;
 
-std::string line;
-
-//???
-string mitigateCommandInjection(string sql){
-    //throw exception("Not implemented");
+//Is the character a space
+bool isSpace(char c){
+    return (c == ' ');
 }
 
-//???
-string mitigateComment(string sql){
-    //throw exception("Not implemented");
+//Is the character alphanumeric
+bool isAlphaNumericUnderscore(char c){
+    return (c >= 65 && c <= 90 || //uppercase letters
+            c >= 97 && c <= 122 || //lowercase letters
+            c >= 48 && c <= 57 || //numbers
+            c == 95);
 }
 
-// In this scenario where we are only asking for a username and password,
-// that information will not get passed into the operating system command 
-// interpreter, and therefore an additional statement attack could not occur.
-// However, if we were to send this info to the system, the best way to mitigate
-// an additional statement attack would be to eliminate semicolons, which is what this
-// function does.
-string mitigateAddState(string sql){
-    //throw exception("Not implemented");
-    for(int i = 0; i < sql.length(); i++){
-        if(sql[i] == 59){    //59 is the ASCII code for ';'
-            sql[i] = ' ';
+//Gets the next word at index
+string getWord(string s, int index){
+    stringstream word = stringstream("");
+
+    for (int i = index; i < s.length(); ++i) {
+        if (isSpace(s[i])){
+            return word.str();
+        } else {
+            word << s[i];
         }
     }
-    return sql;
+
+    return word.str();
 }
 
-//???
-string mitigateUnion(string sql){
-    //throw exception("Not implemented");
-    //Is there union
-    string cleanedScript = "";
-
-    /*******
-     * SET Operator Mitigation
-     * Conditions:
-     * If this string contains 'UNION'
-     * If the sql string contains 'INTERSECT'
-     * If the sql string contains 'MINUS'
-     * If the sql string contains too many spaces
-     */
-    if (sql == "UNION"){
-        return "invalid password";
-    }
-    return cleanedScript;
-}
-
-//???
-string mitigateTautology(string sql){
-
-}
-
-//Returns a query with the username and password. Tests if they are valid.
-//Not really sure what to do with this one, so with this I'm just changing the
-//invalid characters into spaces.
-string mitigateValid(string sql){
-    for (int i = 0; i < sql.length(); i++){
-        if (sql[i] >= 65 && sql[i] <= 90 || //uppercase letters
-        sql[i] >= 97 && sql[i] <= 122 || //lowercase letters
-        sql[i] >= 48 && sql[i] <= 57 || //numbers 
-        sql[i] == 95) //underscore
-        {
-            continue;
-        }
-        else {
-            sql[i] = ' ';
-        }
+//Checks if there is a comment starting at this index. Pass the first character of the comment
+bool isComment(string s, int index){
+    if (s.length() <= index+1){
+        return false;
+    } else {
+        return ((s[index] == '-') && (s[index + 1] == '-'));
     }
 }
 
-//???
-void testCommandInjection(string sql){
-    //throw exception("Not implemented");
+//Checks if it is a quote. SQL only accepts single quotes, we filter from both just in case a dialect of SQL
+// uses it for some strange reason.
+bool isQuote(char c){
+    return ((c == '\'') || (c == '\"'));
 }
 
-//???
+//Checks if it is a semicolon
+bool isSemicolon(char c){
+    return (c == ';');
+}
+
+//Tests if a comment is present
 void testComment(string sql){
-    //throw exception("Not implemented");
+//throw exception("Not implemented");
+    string comment ="--";
+    long found = sql.find(comment);
+    if (found != string::npos)
+    {
+        cout << "\tThere is a comment in this string, we have failed mitigation \n";
+    }
+    else
+    {
+        cout<< "\tSuccess: No Comments\n";
+    }
 }
 
-//???
+//Tests if an additional statement may be present
 void testAddState(string sql){
     //throw exception("Not implemented");
     for(int i = 0; i < sql.length(); i++){
         if(sql[i] == 59){    //59 is the ASCII code for ';'
-            cout << "Possible Additional Statement Attack";
+            cout << "\tPossible Additional Statement Attack\n";
         }
     }
-    
 }
 
-//???
+//Tests if union is present
 void testUnion(string sql){
     //throw exception("Not implemented");
 }
 
-//???
+//Tests if there may be a tautology attack present
 void testTautology(string sql){
 
 }
 
+//Gets the lower case version of the word
+string getLowerCase(string word){
+    transform(word.begin(), word.end(), word.begin(), std::tolower);
+    return word;
+}
+
+//Gets valid input, only accepting letters, numbers and underscores
+string getValidInput(const string& input){
+    stringstream s = stringstream("");
+
+    for (char i : input) {
+        if (isAlphaNumericUnderscore(i)){
+            s << i;
+        }
+    }
+
+    return s.str();
+}
 
 //sub-function of testValid
 bool testValidInput(string input){
     bool validInput = true;
     for (int i = 0; i < input.length(); i++){
         if (input[i] >= 65 && input[i] <= 90 || //uppercase letters
-        input[i] >= 97 && input[i] <= 122 || //lowercase letters
-        input[i] >= 48 && input[i] <= 57 || //numbers 
-        input[i] == 95) //underscore
+            input[i] >= 97 && input[i] <= 122 || //lowercase letters
+            input[i] >= 48 && input[i] <= 57 || //numbers
+            input[i] == 95) //underscore
         {
             continue;
         }
@@ -128,9 +127,9 @@ bool testValidInput(string input){
 }
 
 //Returns a query with the username and password. Tests if they are valid.
-//Assignment says "Generate a set of cases (one for each member of your team) that 
-//represent valid input where the username and the password consist of letters, numbers, 
-//and underscores." Based on this, will check to see if username and password consist of 
+//Assignment says "Generate a set of cases (one for each member of your team) that
+//represent valid input where the username and the password consist of letters, numbers,
+//and underscores." Based on this, will check to see if username and password consist of
 //letters, numbers, and underscore, and will output whether or not it is valid.
 void testValid(string username, string password){
     bool validUsername = testValidInput(username);
@@ -146,70 +145,84 @@ void testValid(string username, string password){
         cout << "The password does not have a valid input" << endl;
 }
 
+//Performs strong mitigation against attacks, only accepting valid input
+string strongMitigation(const string& input){
+    stringstream sBuilder = stringstream("");
+
+    for (char i : input) {
+        if (isAlphaNumericUnderscore(i)){
+            sBuilder << i;
+        }
+    }
+
+    return sBuilder.str();
+}
+
+string weakMitigation(const string& input){
+    stringstream sBuilder = stringstream("");
+
+    for (int i = 0; i < input.length(); ++i) {
+        if (isComment(input, i)) { //Protect against Comment Attack
+            continue;
+        } else if (isQuote(input[i])){ // Protect against Tautology Attack
+            continue;
+        } else if (isSemicolon(input[i])){ // Protect against Additional Statement
+            continue;
+        } else if (isSpace(input[i])){
+            if (getLowerCase(getWord(input, i + 1)) == "union"){ //Protect against Union Attack
+                i += 5; //Skip 5
+                continue;
+            }
+        } else {
+            sBuilder << input[i];
+        }
+    }
+
+    return sBuilder.str();
+}
+
 //Provides a strong mitigation against all five attacks (Tautology, Union, AddState, Comment, Command Injection)
 string genQueryStrong(const string& username, const string& password){
-    stringstream s = stringstream("");
+    cout << endl << "getQueryStrong() called" << endl;
+    cout << "Strong Mitigation against attacks. In other words, only accepts valid input.\n\n";
 
-    //Sanitize these against these 6 tests
+    stringstream s = stringstream("");
 
     s << "SELECT authenticate\n"
          "FROM passwordList\n"
          "WHERE password="
-      << password
+      << strongMitigation(getValidInput(username))
       << " and username="
-      << username
+      << strongMitigation(getValidInput(password))
       << "\";";
 
-    string sql = s.str();
-    sql = mitigateValid(sql);
-    sql = mitigateTautology(sql);
-    sql = mitigateUnion(sql);
-    sql = mitigateAddState(sql);
-    sql = mitigateComment(sql);
-    sql = mitigateCommandInjection(sql);
-
-    testValid(username, password);
-    testTautology(sql);
-    testUnion(sql);
-    testAddState(sql);
-    testComment(sql);
-    testCommandInjection(sql);
-
-    return sql;
+    return s.str();
 }
 
 //Provides a weak mitigation against all four attacks (Tautology, Union, AddState, Comment)
 string genQueryWeak(const string& username, const string& password){
+    cout << endl << "genQueryWeak() called" << endl;
+    cout << "Weak Mitigation against attacks. In other words, goes off of a blocklist.\n\n";
     stringstream s = stringstream("");
 
     s << "SELECT authenticate\n"
          "FROM passwordList\n"
          "WHERE password="
-      << password
+      << weakMitigation(username)
       << " and username="
-      << username
+      << weakMitigation(password)
       << "\";";
 
-    //Sanitize these against these 5 tests
-
-    string sql = s.str();
-    sql = mitigateValid(sql);
-    sql = mitigateTautology(sql);
-    sql = mitigateUnion(sql);
-    sql = mitigateAddState(sql);
-    sql = mitigateComment(sql);
-
-    testValid(username, password);
-    testTautology(sql);
-    testUnion(sql);
-    testAddState(sql);
-    testComment(sql);
-
-    return sql;
+    return s.str();
 }
 
 //Returns a single string (SQL) represents the query used to determine if a user is authenticated on a given system
 string genQuery(const string& username, const string& password){
+    //system("Color 0A");
+    cout << endl << "genQuery() called" << endl;
+    //system("Color 07");
+    cout << "Generates SQL and tests it against the various attacks in the lab\n\n";
+
     stringstream s = stringstream("");
 
     s << "SELECT authenticate\n"
@@ -221,7 +234,6 @@ string genQuery(const string& username, const string& password){
       << "\";";
 
     string sql = s.str();
-
     testValid(username, password);
     testTautology(sql);
     testUnion(sql);
@@ -235,15 +247,26 @@ int main() {
     string in_username;
     string in_password;
 
-
-
     cout << "Please login.\n";
     cout << "Username: ";
     getline(cin, in_username);
     cout << "Password: ";
     getline(cin,in_password);
 
-    cout << genQuery(in_username, in_password) << endl;
+    cout << genQuery(in_username, in_password) << endl << endl;
+
+    try {
+        cout << genQueryWeak(in_username, in_password) << endl << endl;
+    } catch (exception& e) {
+        cout << e.what() << '\n';
+    }
+
+    try {
+        cout << genQueryStrong(in_username, in_password) << endl << endl;
+    } catch (exception& e) {
+        cout << e.what() << '\n';
+    }
+
     return 0;
 }
 
