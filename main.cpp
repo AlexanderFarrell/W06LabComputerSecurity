@@ -56,7 +56,7 @@ bool isSemicolon(char c){
 
 //Gets the lower case version of the word
 string getLowerCase(string word){
-    transform(word.begin(), word.end(), word.begin(), std::tolower);
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
     return word;
 }
 
@@ -79,7 +79,7 @@ void testAddState(string sql){
     bool success = true;
 
     for(int i = 0; i < sql.length(); i++){
-        if(sql[i] == 59 && i != sql.length() - 1){    //59 is the ASCII code for ';'
+        if(sql[i] == 59 && i != sql.length() - 1){  //59 is the ASCII code for ';'
             cout << "\tERROR: Possible Additional Statement Attack\n";
             success = false;
         }
@@ -106,8 +106,20 @@ void testUnion(string sql){
 }
 
 //Tests if there may be a tautology attack present
-void testTautology(string sql){
-
+void testTautology(string username, string password){
+    string lowerUser = getLowerCase(std::move(username));   // We need to check both the Username and Password individually
+    string lowerPass = getLowerCase(std::move(password));   // (the 'sql' variable has the word "password" in it, so "OR" is found)
+    string comment ="or";
+    long foundUser = lowerUser.find(comment);
+    long foundPass = lowerPass.find(comment);
+    if (foundUser != string::npos || foundPass != string::npos)
+    {
+        cout << "\tERROR: There is a possible tautology attack in the query \n";
+    }
+    else
+    {
+        cout<< "\tSuccess: No tautology attack\n";
+    }
 }
 
 //sub-function of testValid
@@ -239,7 +251,7 @@ string genQuery(const string& username, const string& password){
 
     string sql = s.str();
     testValid(username, password);
-    testTautology(sql);
+    testTautology(username, password);
     testUnion(sql);
     testAddState(sql);
     testComment(sql);
